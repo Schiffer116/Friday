@@ -4,7 +4,12 @@ ENV POSTGRES_USER docker
 ENV POSTGRES_PASSWORD docker
 ENV POSTGRES_DB docker
 
-COPY init.sql /docker-entrypoint-initdb.d/
+RUN localedef -i vi_VN -c -f UTF-8 -A /usr/share/locale/locale.alias vi_VN.UTF-8
+ENV LC_MONETARY vi_VN.utf8
+
+COPY *.sql /docker-entrypoint-initdb.d/
+COPY constraints/*.sql /docker-entrypoint-initdb.d/
+COPY data/*.sql /docker-entrypoint-initdb.d/
 
 EXPOSE 5432
 

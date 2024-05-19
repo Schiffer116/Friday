@@ -1,23 +1,26 @@
-#![allow(unused)]
 use crate::internal_error;
 use axum::{
-    extract::{Json, State},
+    extract::State,
     http::StatusCode,
-    response::IntoResponse,
+    extract::Path,
+};
+use sqlx::{
+    postgres::PgPool,
+    query,
 };
 
-use chrono::{naive::serde::ts_microseconds, Duration, NaiveDateTime};
-use serde::Deserialize;
-use sqlx::postgres::PgPool;
-
 pub async fn confirm_ticket(
-) -> impl IntoResponse {
-    "asdfas"
-}
+    State(pool): State<PgPool>,
+    Path(id): Path<i32>,
+) -> Result<(), (StatusCode, String)> {
+    query!(r"
+           UPDATE ticket SET status = 'confirmed' where id = $1
+        ",
+        id
+    )
+    .execute(&pool)
+    .await
+    .map_err(internal_error)?;
 
-pub async fn book_flight() {
+    Ok(())
 }
-
-#[allow(unused)]
-#[cfg(test)]
-mod tests {}

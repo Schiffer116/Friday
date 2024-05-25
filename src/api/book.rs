@@ -1,61 +1,78 @@
+use crate::{
+    utils::ticket::available_tickets,
+    internal_error,
+    AppState,
+};
+
 use axum::{
-    extract::{Json, State},
+    extract::{Json, State, Extension},
     http::StatusCode,
 };
 use serde::Deserialize;
-use sqlx::postgres::PgPool;
 use chrono::Utc;
 
-use crate::{
-    utils::ticket,
-    internal_error,
-};
+use std::sync::Arc;
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct BookingInfo {
     flight_id: i32,
     name: String,
-    id: String,
-    phone_number: String,
+    passenger_id: String,
+    phone: String,
     class: String,
     passenger_type: String,
     note: String,
 }
 
 pub async fn book_flight(
-    State(pool): State<PgPool>,
+    Extension(email): Extension<String>,
+    State(state): State<Arc<AppState>>,
     Json(booking_info): Json<BookingInfo>,
 ) -> Result<(), (StatusCode, String)> {
 
     let BookingInfo {
         flight_id,
         name,
-        id,
-        phone_number,
+        passenger_id,
+        phone,
         class,
         passenger_type,
         note,
     } = booking_info;
 
-    if ticket::available_tickets(pool.clone(), flight_id, class.clone()).await? == 0 {
-        return Err((StatusCode::CONFLICT, format!("class {class} ticket for flight {flight_id}")));
+    if available_tickets(state.db.clone(), flight_id, class.clone()).await? == 0 {
+        return Err((
+            StatusCode::CONFLICT,
+            format!("class {class} ticket for flight {flight_id}")
+        ));
     }
 
     sqlx::query!(r#"
-             INSERT INTO ticket
-                 (flight_id, passenger_name, passenger_id, phone_number, class, passenger_type, book_time, status, note)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, 'booked', $8)
+             INSERT INTO ticket (
+                 flight_id,
+                 book_email,
+                 passenger_name,
+                 passenger_id,
+                 phone_number,
+                 class,
+                 passenger_type,
+                 book_time,
+                 note
+             )
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         "#,
         flight_id,
+        email,
         name,
-        id,
-        phone_number,
+        passenger_id,
+        phone,
         class,
         passenger_type,
         Utc::now().naive_utc(),
         note,
     )
-    .execute(&pool)
+    .execute(&state.db)
     .await
     .map_err(internal_error)?;
 

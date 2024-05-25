@@ -1,5 +1,3 @@
-\c flight_ticket_management
-
 CREATE FUNCTION check_availability()
 RETURNS TRIGGER AS $$
 DECLARE

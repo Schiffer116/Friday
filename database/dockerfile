@@ -1,16 +1,30 @@
-FROM postgres:latest
+FROM postgres:16-bookworm
+
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends \
+    # postgresql-16-cron
+    pgagent
+
+RUN rm -rf /var/lib/apt/lists/*
 
 ENV POSTGRES_USER docker
 ENV POSTGRES_PASSWORD docker
-ENV POSTGRES_DB docker
+ENV POSTGRES_DB flight_ticket_management
 
 RUN localedef -i vi_VN -c -f UTF-8 -A /usr/share/locale/locale.alias vi_VN.UTF-8
 ENV LC_MONETARY vi_VN.utf8
 
+EXPOSE 5432
+
 COPY *.sql /docker-entrypoint-initdb.d/
 COPY constraints/*.sql /docker-entrypoint-initdb.d/
 COPY data/*.sql /docker-entrypoint-initdb.d/
+COPY user/*.sql /docker-entrypoint-initdb.d/
 
-EXPOSE 5432
+RUN pgagent hostaddr=127.0.0.1 dbname=flight_ticket_management user=docker
 
-CMD ["postgres"]
+CMD [ \
+    "postgres" \
+    # "-c", "shared_preload_libraries=pg_cron", \
+    # "-c", "cron.database_name=flight_ticket_management" \
+]

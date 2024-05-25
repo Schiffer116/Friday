@@ -1,11 +1,11 @@
-CREATE DATABASE flight_ticket_management;
-
-\c flight_ticket_management;
+CREATE EXTENSION pgagent;
 
 CREATE TABLE airport (
     id CHAR(3) PRIMARY KEY,
     name VARCHAR(256) NOT NULL,
-    country VARCHAR(64) NOT NULL
+    country VARCHAR(64) NOT NULL,
+    city VARCHAR(64) NOT NULL,
+    status BOOL DEFAULT TRUE NOT NULL
 );
 
 CREATE TABLE flight (
@@ -32,7 +32,8 @@ CREATE TABLE layover (
 
 CREATE TABLE ticket_class (
     class VARCHAR(16) PRIMARY KEY,
-    multiplier SMALLINT NOT NULL
+    multiplier SMALLINT NOT NULL,
+    status BOOL DEFAULT TRUE NOT NULL
 );
 
 CREATE TABLE passenger_type (
@@ -40,10 +41,20 @@ CREATE TABLE passenger_type (
     multiplier SMALLINT NOT NULL
 );
 
-CREATE TYPE ticket_status AS ENUM ('booked', 'confirmed', 'cancelled', 'flown');
+CREATE TYPE ticket_status AS ENUM ('booked', 'confirmed', 'cancelled', 'expired');
+
+CREATE TYPE user_role AS ENUM ('admin', 'customer');
+
+CREATE TABLE user_data (
+    email VARCHAR(254) PRIMARY KEY,
+    name VARCHAR(32) NOT NULL,
+    password_hash CHAR(60) NOT NULL,
+    role USER_ROLE DEFAULT 'customer' NOT NULL
+);
 
 CREATE TABLE ticket (
     id SERIAL PRIMARY KEY,
+    book_email VARCHAR(254) NOT NULL,
     flight_id INT NOT NULL,
     passenger_name VARCHAR(128) NOT NULL,
     passenger_id VARCHAR(16) NOT NULL,
@@ -53,6 +64,7 @@ CREATE TABLE ticket (
     book_time TIMESTAMP NOT NULL,
     status TICKET_STATUS DEFAULT 'booked' NOT NULL,
     note TEXT,
+    FOREIGN KEY (book_email) REFERENCES user_data (email),
     FOREIGN KEY (class) REFERENCES ticket_class (class),
     FOREIGN KEY (passenger_type) REFERENCES passenger_type (type)
 );
@@ -71,20 +83,16 @@ CREATE TABLE policy (
     min_flight_duration INTERVAL DEFAULT '30 minutes' NOT NULL,
     min_layover_duration INTERVAL DEFAULT '10 minutes' NOT NULL,
     max_layover_duration INTERVAL DEFAULT '20 minutes' NOT NULL,
-    max_layover_count SMALLINT DEFAULT 2 NOT NULL,
-    advance_book_deadline INTERVAL DEFAULT '1 day' NOT NULL,
-    cancellation_deadline INTERVAL DEFAULT '1 day' NOT NULL
+    max_layover_count INT DEFAULT 2 NOT NULL,
+    advance_book_deadline INTERVAL DEFAULT '24 hours' NOT NULL,
+    cancellation_deadline INTERVAL DEFAULT '24 hours' NOT NULL
 );
 
-CREATE TYPE user_type AS ENUM ('admin', 'customer');
-
-CREATE TABLE user_data (
-    user_name VARCHAR(32) PRIMARY KEY,
-    name VARCHAR(256) NOT NULL,
-    password_hash CHAR(31) NOT NULL,
-    password_salt CHAR(16) NOT NULL,
-    email VARCHAR(254) NOT NULL,
-    role USER_TYPE DEFAULT 'customer' NOT NULL
+CREATE TABLE reset_password_token (
+    email VARCHAR(254) PRIMARY KEY,
+    hash CHAR(60),
+    status BOOL,
+    FOREIGN KEY (email) REFERENCES user_data (email)
 );
 
 INSERT INTO policy (lock) VALUES ('X');

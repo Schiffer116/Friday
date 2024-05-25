@@ -1,17 +1,16 @@
-use crate::internal_error;
+use crate::{internal_error, AppState};
 use axum::{
     extract::{Json, State},
     http::StatusCode,
 };
 use chrono::{naive::serde::ts_microseconds, NaiveDateTime};
 use serde::Deserialize;
-use sqlx::postgres::{
-    PgPool,
-    types::{
-        PgMoney,
-        PgInterval,
-    }
+use sqlx::postgres::types::{
+    PgMoney,
+    PgInterval,
 };
+
+use std::sync::Arc;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -22,6 +21,7 @@ pub struct FlightSchedule {
     #[serde(with = "ts_microseconds")]
     date_time: NaiveDateTime,
     duration: i64,
+    seat_count: Vec<(String, i32)>,
     layovers: Vec<Layover>,
 }
 
@@ -35,7 +35,7 @@ struct Layover {
 }
 
 pub async fn schedule_flight(
-    State(pool): State<PgPool>,
+    State(state): State<Arc<AppState>>,
     Json(schedule): Json<FlightSchedule>,
 ) -> Result<(), (StatusCode, String)> {
 
@@ -45,10 +45,11 @@ pub async fn schedule_flight(
         dst,
         date_time,
         duration,
+        seat_count,
         layovers,
     } = schedule;
 
-    let mut transaction = pool.begin().await.map_err(internal_error)?;
+    let mut transaction = state.db.begin().await.map_err(internal_error)?;
 
     let flight_id = sqlx::query_scalar!(
         r#"
@@ -66,6 +67,21 @@ pub async fn schedule_flight(
     .fetch_one(&mut *transaction)
     .await
     .map_err(internal_error)?;
+
+    for (class, count) in seat_count {
+        let _ = sqlx::query!(r#"
+                INSERT INTO flight_ticket_count
+                    (flight_id, ticket_class, ticket_count)
+                VALUES ($1, $2, $3)
+            "#,
+            flight_id,
+            class,
+            count,
+        )
+        .execute(&mut *transaction)
+        .await
+        .map_err(internal_error);
+    }
 
     for layover in layovers {
         let _ = sqlx::query!(r#"

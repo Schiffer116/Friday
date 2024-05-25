@@ -1,3 +1,7 @@
+use axum::{
+    http::StatusCode,
+    extract::{Query, State},
+};
 use sqlx::{
     Error,
     postgres::{
@@ -5,10 +9,38 @@ use sqlx::{
         types::PgMoney,
     }
 };
-use axum::http::StatusCode;
 use tracing::instrument;
+use serde::Deserialize;
 
 use crate::internal_error;
+use crate::AppState;
+
+use std::sync::Arc;
+
+#[derive(Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct Ticket {
+    flight_id: i32,
+    ticket_class: String,
+    passenger_type: String,
+}
+
+pub async fn price(
+    State(state): State<Arc<AppState>>,
+    Query(Ticket { flight_id, ticket_class, passenger_type }): Query<Ticket>,
+) -> Result<String, (StatusCode, String)> {
+
+    Ok(
+        ticket_price(
+            state.db.clone(),
+            flight_id,
+            &ticket_class,
+            &passenger_type
+        )
+        .await?
+        .to_string()
+    )
+}
 
 #[instrument(skip_all, fields(f_id = flight_id, t_class = ticket_class, p_type = passenger_type))]
 pub async fn ticket_price(
@@ -18,7 +50,7 @@ pub async fn ticket_price(
     passenger_type: &String,
 ) -> Result<i64, (StatusCode, String)> {
 
-    let PgMoney(mut ticket_price) = sqlx::query_scalar!(r#"
+    let PgMoney(ticket_price) = sqlx::query_scalar!(r#"
             SELECT ticket_price
             FROM flight
             WHERE id = $1
@@ -72,9 +104,11 @@ pub async fn ticket_price(
 
     tracing::debug!(t_mult = %type_multiplier);
 
-    ticket_price = (ticket_price as f64 * (class_multiplier as f64 / 100_f64) * (type_multiplier as f64 / 100_f64)) as i64;
+    let price = ticket_price as f64;
+    let class_mult = class_multiplier as f64 / 100_f64;
+    let type_mult = type_multiplier as f64 / 100_f64;
 
-    Ok(ticket_price)
+    Ok((price * class_mult * type_mult) as i64)
 }
 
 pub async fn available_tickets(

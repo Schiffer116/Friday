@@ -1,5 +1,3 @@
-\c flight_ticket_management
-
 CREATE FUNCTION check_flight_duration()
 RETURNS TRIGGER AS $$
 DECLARE

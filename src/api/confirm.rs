@@ -1,24 +1,28 @@
-use crate::internal_error;
-use axum::{
-    extract::State,
-    http::StatusCode,
-    extract::Path,
-};
-use sqlx::{
-    postgres::PgPool,
-    query,
+use crate::{
+    internal_error,
+    AppState,
 };
 
+use axum::{
+    http::StatusCode,
+    extract::{Path, State},
+};
+use sqlx::query;
+
+use std::sync::Arc;
+
 pub async fn confirm_ticket(
-    State(pool): State<PgPool>,
+    State(state): State<Arc<AppState>>,
     Path(id): Path<i32>,
 ) -> Result<(), (StatusCode, String)> {
     query!(r"
-           UPDATE ticket SET status = 'confirmed' where id = $1
+           UPDATE ticket
+           SET status = 'confirmed'
+           WHERE id = $1
         ",
         id
     )
-    .execute(&pool)
+    .execute(&state.db)
     .await
     .map_err(internal_error)?;
 

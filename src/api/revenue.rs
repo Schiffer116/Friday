@@ -82,7 +82,7 @@ pub async fn year_report(
         month: month as i32 + 1,
         flight: info.flights.len() as u32,
         revenue: info.revenue,
-        percent: ((info.revenue * 100) as f64 / revenue as f64).round() as u8,
+        percent: (((info.revenue * 100) as f64) / (revenue as f64)).round() as u8,
     })
     .collect();
 
@@ -140,16 +140,16 @@ async fn month_info(
         }
     );
 
-    let revenue: i64 = ticket_revenue.values().fold(0, |acc, (_, revenue)| acc + revenue);
+    let total_revenue: i64 = ticket_revenue.values().fold(0, |acc, (_, revenue)| acc + revenue);
     let flights = ticket_revenue.into_iter().map(|(flight_id, (ticket_count, revenue))|
         FlightInfo {
             id: flight_id,
             ticket_count,
             revenue,
-            percent: ((100 * revenue) as f64 / revenue as f64) as i32,
+            percent: ((100 * revenue) as f64 / total_revenue as f64) as i32,
         }
     )
     .collect();
 
-    Ok(MonthInfo { revenue, flights })
+    Ok(MonthInfo { revenue: total_revenue, flights })
 }

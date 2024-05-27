@@ -88,3 +88,34 @@ CREATE TRIGGER max_layover
     BEFORE INSERT ON layover
     FOR EACH ROW
     EXECUTE FUNCTION check_layover_count();
+
+--------------------------------------------------------------------------------
+
+CREATE FUNCTION clean_flight()
+RETURNS TRIGGER AS $$
+DECLARE
+    ticket_bought INT;
+BEGIN
+    SELECT COUNT(id)
+    INTO ticket_bought
+    FROM ticket
+    WHERE flight_id = OLD.id;
+
+    IF ticket_bought <> 0 THEN
+        RAISE EXCEPTION 'Flight id (%) can not be deleted', OLD.id;
+    END IF;
+
+    DELETE FROM layover
+    WHERE flight_id = OLD.id;
+
+    DELETE FROM flight_ticket_count
+    WHERE flight_id = OLD.id;
+
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER remove_layover
+    BEFORE DELETE ON flight
+    FOR EACH ROW
+    EXECUTE FUNCTION clean_flight();

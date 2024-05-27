@@ -51,4 +51,8 @@ INSERT INTO layover (flight_id, ordinal, airport_id, duration, note) VALUES
 (39, 1, 'DEL', '14 minutes', 'Layover at Indira Gandhi International Airport'),
 (40, 1, 'CDG', '18 minutes', 'Layover at Charles de Gaulle Airport'),
 (41, 1, 'AMS', '20 minutes', 'Short layover for refueling'),
-(42, 1, 'HAN', '10 minutes', 'Quick layover for passenger change');
+(42, 1, 'HAN', '10 minutes', 'Quick layover for passenger change'),
+
+-- test
+(43, 1, 'HAN', '10 minutes', 'Quick layover for passenger change'),
+(43, 2, 'HAN', '10 minutes', 'Quick layover for passenger change');

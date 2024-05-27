@@ -1,16 +1,34 @@
-use crate::{internal_error, AppState};
+use crate::{query_error, internal_error, AppState};
 use axum::{
     extract::{Path, Json, State},
     http::StatusCode,
 };
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use std::sync::Arc;
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TicketClass {
-    name: String,
+    class: String,
     multiplier: i16,
+    status: bool,
+}
+
+pub async fn get_class(
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<Vec<TicketClass>>, (StatusCode, String)> {
+    let classes = sqlx::query_as!(
+        TicketClass,
+        r"
+            SELECT class, multiplier, status
+            FROM ticket_class
+         ",
+    )
+    .fetch_all(&state.db)
+    .await
+    .map_err(internal_error)?;
+
+    Ok(Json(classes))
 }
 
 pub async fn add_class(
@@ -22,12 +40,12 @@ pub async fn add_class(
                 (class, multiplier)
             VALUES ($1, $2)
          ",
-         ticket_class.name,
+         ticket_class.class,
          ticket_class.multiplier,
     )
     .execute(&state.db)
     .await
-    .map_err(internal_error)?;
+    .map_err(query_error)?;
 
     Ok(())
 }
@@ -45,7 +63,7 @@ pub async fn remove_class(
     )
     .execute(&state.db)
     .await
-    .map_err(internal_error)?;
+    .map_err(query_error)?;
 
     Ok(())
 }

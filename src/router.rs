@@ -24,20 +24,19 @@ use std::{
 
 use crate::{
     api::{
-        schedule::schedule_flight,
+        schedule::{list_schedule, add_schedule, remove_schedule, update_schedule},
         book::book_flight,
         confirm::confirm_ticket,
-        list_flight::list_flight,
         revenue::{month_report, year_report},
-        airport::add_airport,
-        class::add_class,
+        airport::{list_airport, add_airport, remove_airport},
+        class::{get_class, add_class, remove_class},
         history::{user_history, full_history},
         cancel::cancel_ticket,
         policy::{get_policy, change_policy},
-        seat_class::ticket_class,
     },
     auth::{
         login::login,
+        logout::logout,
         register::register,
         forgot::forgot,
     },
@@ -45,7 +44,6 @@ use crate::{
     utils::{
         jwt::{auth_admin, auth_private},
         ticket::price,
-        cities::list_cities,
     },
 };
 
@@ -88,7 +86,7 @@ pub fn backend(app_state: Arc<AppState>) -> Router {
             CorsLayer::new()
                 .allow_origin("http://localhost:5000".parse::<HeaderValue>().unwrap())
                 .allow_headers([axum::http::header::CONTENT_TYPE])
-                .allow_methods([Method::GET, Method::POST])
+                .allow_methods([Method::DELETE, Method::GET, Method::POST])
                 .allow_credentials(true)
         )
         .route_layer(trace_layer!())
@@ -117,9 +115,9 @@ async fn handler_404() -> impl IntoResponse {
 fn public_api(app_state: Arc<AppState>) -> Router<Arc<AppState>> {
     Router::new()
         .route("/login", post(login))
+        .route("/logout", get(logout))
         .route("/register", post(register))
         .route("/forgot/:email", post(forgot))
-        .route("/class", get(ticket_class))
         .with_state(app_state)
 }
 
@@ -127,7 +125,8 @@ fn private_api(app_state: Arc<AppState>) -> Router<Arc<AppState>> {
     Router::new()
         .route("/book", post(book_flight))
         .route("/cancel/:id", get(cancel_ticket))
-        .route("/list", get(list_flight))
+        .route("/class", get(get_class))
+        .route("/schedule", get(list_schedule))
         .route("/user-history", get(user_history))
         .route_layer(middleware::from_fn_with_state(app_state.clone(), auth_private))
         .with_state(app_state)
@@ -135,15 +134,15 @@ fn private_api(app_state: Arc<AppState>) -> Router<Arc<AppState>> {
 
 fn admin_api(app_state: Arc<AppState>) -> Router<Arc<AppState>> {
     Router::new()
-        .route("/schedule", post(schedule_flight))
-        .route("/confirm/:id", post(confirm_ticket))
+        .route("/schedule", post(add_schedule).delete(remove_schedule).put(update_schedule))
+        .route("/confirm", post(confirm_ticket))
+
         .route("/revenue/:year", get(year_report))
         .route("/revenue/:year/:month", get(month_report))
-        .route("/add-class", post(add_class))
-        .route("/add-airport", post(add_airport))
+        .route("/class", post(add_class).delete(remove_class))
+        .route("/airport", post(add_airport).delete(remove_airport))
         .route("/full-history", get(full_history))
-        .route("/get-policy", get(get_policy))
-        .route("/change-policy", post(change_policy))
+        .route("/policy", get(get_policy).put(change_policy))
         .route_layer(middleware::from_fn_with_state(app_state.clone(), auth_admin))
         .with_state(app_state)
 }
@@ -151,6 +150,6 @@ fn admin_api(app_state: Arc<AppState>) -> Router<Arc<AppState>> {
 fn util_routes(app_state: Arc<AppState>) -> Router<Arc<AppState>> {
     Router::new()
         .route("/price", get(price))
-        .route("/cities", get(list_cities))
+        .route("/airport", get(list_airport))
         .with_state(app_state)
 }

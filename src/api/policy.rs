@@ -1,7 +1,7 @@
 use crate::{internal_error, AppState};
 
 use axum::{
-    extract::{Query, State},
+    extract::State,
     http::StatusCode,
     Json,
 };
@@ -19,7 +19,7 @@ pub struct Policy {
     cancellation_deadline: i64,
 }
 
-pub struct PolicyQueryTarget {
+struct PolicyQueryTarget {
     #[allow(unused)]
     lock: String,
     min_flight_duration: PgInterval,
@@ -28,14 +28,6 @@ pub struct PolicyQueryTarget {
     max_layover_count: i32,
     advance_book_deadline: PgInterval,
     cancellation_deadline: PgInterval,
-}
-
-fn int_to_interval(raw: i64) -> PgInterval {
-    PgInterval {
-        months: 0,
-        days: 0,
-        microseconds: raw,
-    }
 }
 
 pub async fn get_policy(
@@ -51,40 +43,55 @@ pub async fn get_policy(
     .fetch_one(&state.db)
     .await
     .map_err(internal_error)?;
-    Ok(Json(Policy {
-        min_flight_duration: target.min_flight_duration.microseconds,
-        min_layover_duration: target.min_layover_duration.microseconds,
-        max_layover_duration: target.max_layover_duration.microseconds,
-        max_layover_count: target.max_layover_count,
-        advance_book_deadline: target.advance_book_deadline.microseconds,
-        cancellation_deadline: target.cancellation_deadline.microseconds,
-    }))
+
+    Ok(Json(target.into()))
 }
 
 pub async fn change_policy(
     State(state): State<Arc<AppState>>,
-    Query(policy): Query<Policy>
+    Json(policy): Json<Policy>
 ) -> Result<(), (StatusCode, String)> {
     sqlx::query!(r"
             UPDATE policy
             SET
-                min_flight_duration = $1::INTERVAL,
+                min_flight_duration = $1,
                 min_layover_duration = $2,
                 max_layover_duration = $3,
                 max_layover_count = $4,
                 advance_book_deadline = $5,
                 cancellation_deadline = $6
         ",
-        int_to_interval(policy.min_flight_duration),
-        int_to_interval(policy.min_layover_duration),
-        int_to_interval(policy.max_layover_duration),
+        i64_to_interval(policy.min_flight_duration),
+        i64_to_interval(policy.min_layover_duration),
+        i64_to_interval(policy.max_layover_duration),
         policy.max_layover_count,
-        int_to_interval(policy.advance_book_deadline),
-        int_to_interval(policy.cancellation_deadline)
+        i64_to_interval(policy.advance_book_deadline),
+        i64_to_interval(policy.cancellation_deadline)
     )
     .execute(&state.db)
     .await
     .map_err(internal_error)?;
 
     Ok(())
+}
+
+fn i64_to_interval(raw: i64) -> PgInterval {
+    PgInterval {
+        months: 0,
+        days: 0,
+        microseconds: raw,
+    }
+}
+
+impl From<PolicyQueryTarget> for Policy {
+    fn from(value: PolicyQueryTarget) -> Self {
+        Policy {
+            min_flight_duration: value.min_flight_duration.microseconds,
+            min_layover_duration: value.min_layover_duration.microseconds,
+            max_layover_duration: value.max_layover_duration.microseconds,
+            max_layover_count: value.max_layover_count,
+            advance_book_deadline: value.advance_book_deadline.microseconds,
+            cancellation_deadline: value.cancellation_deadline.microseconds,
+        }
+    }
 }

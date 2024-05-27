@@ -73,6 +73,21 @@ async fn connect_database(database_url: String) -> PgPool {
     }
 }
 
-fn internal_error(err: impl std::error::Error) -> (StatusCode, String) {
-    (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
+
+macro_rules! status_error {
+    ($fn_name: ident, $code: expr) => {
+        fn $fn_name(err: impl std::error::Error) -> (StatusCode, String) {
+            ($code, err.to_string())
+        }
+    }
+}
+
+status_error!(internal_error, StatusCode::INTERNAL_SERVER_ERROR);
+status_error!(request_error, StatusCode::BAD_REQUEST);
+
+fn query_error(err: sqlx::Error) -> (StatusCode, String) {
+    match err {
+        sqlx::Error::Database(_) => request_error(err),
+        _ => internal_error(err),
+    }
 }

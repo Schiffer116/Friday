@@ -96,13 +96,17 @@ RETURNS TRIGGER AS $$
 DECLARE
     ticket_bought INT;
 BEGIN
+    IF NOW() > OLD.date_time THEN
+        RAISE EXCEPTION 'Can not change history';
+    END IF;
+
     SELECT COUNT(id)
     INTO ticket_bought
     FROM ticket
     WHERE flight_id = OLD.id;
 
     IF ticket_bought <> 0 THEN
-        RAISE EXCEPTION 'Flight id (%) can not be deleted', OLD.id;
+        RAISE EXCEPTION 'Flight id (%) can not be altered', OLD.id;
     END IF;
 
     DELETE FROM layover
@@ -116,6 +120,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER remove_layover
-    BEFORE DELETE ON flight
+    BEFORE DELETE OR UPDATE ON flight
     FOR EACH ROW
     EXECUTE FUNCTION clean_flight();

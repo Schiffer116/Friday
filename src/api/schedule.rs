@@ -79,7 +79,7 @@ pub async fn list_schedule(
         FlightQueryTarget,
         r#"
         SELECT
-            id,
+            f.id,
             ticket_price AS "price",
             source_airport_id as "src_airport",
             destination_airport_id as "dst_airport",
@@ -105,6 +105,9 @@ pub async fn list_schedule(
             GROUP BY flight_id
         ) t
         ON f.id = t.flight_id
+        JOIN airport a
+        ON a.status = true AND (f.source_airport_id = a.id OR f.destination_airport_id = a.id)
+        AND f.destination_airport_id = a.id
         GROUP BY f.id, t.booked_count, c.sum
     "#)
     .fetch_all(&state.db)
@@ -238,7 +241,7 @@ pub async fn add_schedule(
         )
         .execute(&mut *transaction)
         .await
-        .map_err(internal_error)?;
+        .map_err(query_error)?;
     }
 
     transaction.commit().await.map_err(internal_error)?;
@@ -266,13 +269,13 @@ pub async fn remove_schedule(
     Ok(())
 }
 
-
 pub async fn update_schedule(
     State(state): State<Arc<AppState>>,
     Json(schedule): Json<Flight>,
 ) -> Result<(), (StatusCode, String)> {
 
     let Flight {
+        id,
         price,
         src,
         dst,
@@ -285,30 +288,36 @@ pub async fn update_schedule(
 
     let mut transaction = state.db.begin().await.map_err(internal_error)?;
 
-    let flight_id = sqlx::query_scalar!(
+    sqlx::query_scalar!(
         r#"
-            INSERT INTO flight
-                (ticket_price, source_airport_id, destination_airport_id, date_time, duration)
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING id
+            UPDATE flight
+            SET
+                ticket_price = $1,
+                source_airport_id = $2,
+                destination_airport_id = $3,
+                date_time = $4,
+                duration = $5
+            WHERE id = $6
         "#,
         PgMoney(price),
         src,
         dst,
         date_time,
         PgInterval { months: 0, days: 0, microseconds: duration },
+        id
     )
-    .fetch_one(&mut *transaction)
+    .execute(&mut *transaction)
     .await
     .map_err(query_error)?;
 
+    println!("{}", seat_count.len());
     for TicketCount { class, count } in seat_count {
-        let _ = sqlx::query!(r#"
+        sqlx::query!(r#"
                 INSERT INTO flight_ticket_count
                     (flight_id, ticket_class, ticket_count)
                 VALUES ($1, $2, $3)
             "#,
-            flight_id,
+            id,
             class,
             count,
         )
@@ -318,12 +327,12 @@ pub async fn update_schedule(
     }
 
     for layover in layovers {
-        let _ = sqlx::query!(r#"
+        sqlx::query!(r#"
                 INSERT INTO layover
                     (flight_id, ordinal, airport_id, duration, note)
                 VALUES ($1, $2, $3, $4, $5)
             "#,
-            flight_id,
+            id,
             layover.ord,
             layover.airport_id,
             PgInterval { months: 0, days: 0, microseconds: layover.duration },
@@ -331,7 +340,7 @@ pub async fn update_schedule(
         )
         .execute(&mut *transaction)
         .await
-        .map_err(internal_error)?;
+        .map_err(query_error)?;
     }
 
     transaction.commit().await.map_err(internal_error)?;

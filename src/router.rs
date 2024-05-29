@@ -28,8 +28,8 @@ use crate::{
         book::book_flight,
         confirm::confirm_ticket,
         revenue::{month_report, year_report},
-        airport::{list_airport, add_airport, remove_airport},
-        class::{get_class, add_class, remove_class},
+        airport::{list_airport, add_airport, update_airport},
+        class::{get_class, add_class, update_class},
         history::{user_history, full_history},
         cancel::cancel_ticket,
         policy::{get_policy, change_policy},
@@ -86,7 +86,7 @@ pub fn backend(app_state: Arc<AppState>) -> Router {
             CorsLayer::new()
                 .allow_origin("http://localhost:5000".parse::<HeaderValue>().unwrap())
                 .allow_headers([axum::http::header::CONTENT_TYPE])
-                .allow_methods([Method::DELETE, Method::GET, Method::POST])
+                .allow_methods([Method::PUT, Method::DELETE, Method::GET, Method::POST])
                 .allow_credentials(true)
         )
         .route_layer(trace_layer!())
@@ -124,7 +124,7 @@ fn public_api(app_state: Arc<AppState>) -> Router<Arc<AppState>> {
 fn private_api(app_state: Arc<AppState>) -> Router<Arc<AppState>> {
     Router::new()
         .route("/book", post(book_flight))
-        .route("/cancel/:id", get(cancel_ticket))
+        .route("/cancel/:id", post(cancel_ticket))
         .route("/class", get(get_class))
         .route("/schedule", get(list_schedule))
         .route("/user-history", get(user_history))
@@ -139,8 +139,9 @@ fn admin_api(app_state: Arc<AppState>) -> Router<Arc<AppState>> {
 
         .route("/revenue/:year", get(year_report))
         .route("/revenue/:year/:month", get(month_report))
-        .route("/class", post(add_class).delete(remove_class))
-        .route("/airport", post(add_airport).delete(remove_airport))
+
+        .route("/class", post(add_class).put(update_class))
+        .route("/airport", post(add_airport).put(update_airport))
         .route("/full-history", get(full_history))
         .route("/policy", get(get_policy).put(change_policy))
         .route_layer(middleware::from_fn_with_state(app_state.clone(), auth_admin))

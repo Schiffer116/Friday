@@ -55,36 +55,22 @@ pub async fn add_airport(
     Ok(())
 }
 
-pub async fn remove_airport(
+pub async fn update_airport(
     State(state): State<Arc<AppState>>,
-    id: String,
+    Json(airport): Json<Airport>
 ) -> Result<(), (StatusCode, String)> {
-    let result = sqlx::query!(r"
-            DELETE FROM airport
+    sqlx::query!(r"
+            UPDATE airport
+            SET id = $1, name = $2, city = $3, status = $4
             WHERE id = $1
          ",
-         id
+         airport.id,
+         airport.name,
+         airport.city,
+         airport.status,
     )
     .execute(&state.db)
-    .await;
-
-    if result.is_ok() {
-        return Ok(())
-    }
-
-    if let Err(sqlx::Error::Database(_)) = result {
-        sqlx::query!(r"
-                UPDATE airport
-                SET status = false
-                WHERE id = $1
-             ",
-             id
-        )
-        .execute(&state.db)
-        .await
-        .map_err(query_error)?;
-    } else {
-        result.map_err(internal_error)?;
-    }
+    .await
+    .map_err(query_error)?;
     Ok(())
 }

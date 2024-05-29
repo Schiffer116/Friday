@@ -86,13 +86,6 @@ CREATE TABLE policy (
     cancellation_deadline INTERVAL DEFAULT '24 hours' NOT NULL CHECK (cancellation_deadline >= '0'::INTERVAL)
 );
 
-CREATE TABLE reset_password_token (
-    email VARCHAR(254) PRIMARY KEY,
-    hash CHAR(60),
-    status BOOL,
-    FOREIGN KEY (email) REFERENCES user_data (email)
-);
-
 INSERT INTO policy (lock) VALUES ('X');
 
 INSERT INTO ticket_class (class, multiplier) VALUES

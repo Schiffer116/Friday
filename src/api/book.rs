@@ -44,7 +44,7 @@ pub async fn book_flight(
     if available_tickets(state.db.clone(), flight_id, class.clone()).await? == 0 {
         return Err((
             StatusCode::CONFLICT,
-            format!("class {class} ticket for flight {flight_id}")
+            format!("no class {class} ticket left for flight {flight_id}")
         ));
     }
 

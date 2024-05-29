@@ -1,6 +1,6 @@
 use crate::{query_error, internal_error, AppState};
 use axum::{
-    extract::{Path, Json, State},
+    extract::{Json, State},
     http::StatusCode,
 };
 use serde::{Serialize, Deserialize};
@@ -50,16 +50,18 @@ pub async fn add_class(
     Ok(())
 }
 
-pub async fn remove_class(
+pub async fn update_class(
     State(state): State<Arc<AppState>>,
-    Path(class): Path<String>,
+    Json(ticket_class): Json<TicketClass>,
 ) -> Result<(), (StatusCode, String)> {
     sqlx::query!(r"
             UPDATE ticket_class
-            SET status = false
+            SET class = $1, multiplier = $2, status = $3
             WHERE class = $1
          ",
-         class
+         ticket_class.class,
+         ticket_class.multiplier,
+         ticket_class.status,
     )
     .execute(&state.db)
     .await

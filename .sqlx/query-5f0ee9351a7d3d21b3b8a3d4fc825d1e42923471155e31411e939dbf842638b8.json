@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO layover\n                    (flight_id, ordinal, airport_id, duration, note)\n                VALUES ($1, $2, $3, $4, $5)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int2",
+        "Bpchar",
+        "Interval",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5f0ee9351a7d3d21b3b8a3d4fc825d1e42923471155e31411e939dbf842638b8"
+}

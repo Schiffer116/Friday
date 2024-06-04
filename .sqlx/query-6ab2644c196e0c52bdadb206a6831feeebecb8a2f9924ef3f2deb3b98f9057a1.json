@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    SELECT\n                        ticket_class as class,\n                        SUM(ticket_count)::INT as \"count!\"\n                    FROM flight_ticket_count\n                    WHERE flight_id = $1\n                    GROUP BY ticket_class\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "class",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "count!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "6ab2644c196e0c52bdadb206a6831feeebecb8a2f9924ef3f2deb3b98f9057a1"
+}

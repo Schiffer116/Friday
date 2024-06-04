@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT city, id, status, name\n        FROM airport\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "city",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "id",
+        "type_info": "Bpchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "status",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 3,
+        "name": "name",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "fa8edd394e48c1da8acea8787afbbef713a9c4aaa55e7bd8c19e1df07656038a"
+}

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO airport\n                (id, name, city)\n            VALUES ($1, $2, $3)\n         ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Bpchar",
+        "Varchar",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "564d6f1c43f64a26419dbed210e97d31269f7c65a334b19e48e2797810b7bd00"
+}

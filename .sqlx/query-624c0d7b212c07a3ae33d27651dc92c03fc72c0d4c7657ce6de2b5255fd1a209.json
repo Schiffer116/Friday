@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    SELECT\n                        airport_id,\n                        ordinal as \"ord\",\n                        duration,\n                        note\n                    FROM layover\n                    WHERE flight_id = $1\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "airport_id",
+        "type_info": "Bpchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "ord",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 2,
+        "name": "duration",
+        "type_info": "Interval"
+      },
+      {
+        "ordinal": 3,
+        "name": "note",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "624c0d7b212c07a3ae33d27651dc92c03fc72c0d4c7657ce6de2b5255fd1a209"
+}

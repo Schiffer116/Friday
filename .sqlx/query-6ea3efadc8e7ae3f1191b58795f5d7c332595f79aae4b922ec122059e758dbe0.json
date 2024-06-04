@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT COUNT(t.id) as \"count!\", t.flight_id, t.class, t.passenger_type\n            FROM flight f\n            JOIN ticket t\n            ON t.flight_id = f.id\n            WHERE date_part('year', f.date_time)::SMALLINT = $1\n            AND date_part('month', f.date_time)::SMALLINT = $2\n            AND (t.status = 'expired' OR t.status = 'confirmed')\n            GROUP BY (t.flight_id, t.class, t.passenger_type)\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "flight_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "class",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "passenger_type",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int2",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "6ea3efadc8e7ae3f1191b58795f5d7c332595f79aae4b922ec122059e758dbe0"
+}

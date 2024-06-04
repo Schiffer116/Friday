@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n             INSERT INTO ticket (\n                 flight_id,\n                 book_email,\n                 passenger_name,\n                 passenger_id,\n                 phone_number,\n                 class,\n                 passenger_type,\n                 book_time,\n                 note\n             )\n             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Timestamp",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "29687c10dd7d0bd9afbb07dc71ab1b519c4d9c987fe8531c925ca20f47f7c2ad"
+}

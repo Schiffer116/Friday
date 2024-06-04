@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE airport\n            SET id = $1, name = $2, city = $3, status = $4\n            WHERE id = $1\n         ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Bpchar",
+        "Varchar",
+        "Varchar",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8add9b001843bad453130989132c7c2f723606f83bf8e1a7646022643cacc324"
+}

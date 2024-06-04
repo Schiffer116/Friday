@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO flight\n                (ticket_price, source_airport_id, destination_airport_id, date_time, duration)\n            VALUES ($1, $2, $3, $4, $5)\n            RETURNING id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Money",
+        "Bpchar",
+        "Bpchar",
+        "Timestamp",
+        "Interval"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "23d1c5b00ffe85b232facadc3389ddb36af302967dda2fc30c10de6d9278ec17"
+}

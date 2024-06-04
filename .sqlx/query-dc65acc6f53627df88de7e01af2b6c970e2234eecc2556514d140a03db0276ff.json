@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE policy\n            SET\n                min_flight_duration = $1,\n                min_layover_duration = $2,\n                max_layover_duration = $3,\n                max_layover_count = $4,\n                advance_book_deadline = $5,\n                cancellation_deadline = $6\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Interval",
+        "Interval",
+        "Interval",
+        "Int4",
+        "Interval",
+        "Interval"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dc65acc6f53627df88de7e01af2b6c970e2234eecc2556514d140a03db0276ff"
+}

@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT class, multiplier, status\n            FROM ticket_class\n         ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "class",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "multiplier",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 2,
+        "name": "status",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "10a2ae20be2b6d8f0715aa2243475d08193f08a755ea0dfe5317769b14539172"
+}

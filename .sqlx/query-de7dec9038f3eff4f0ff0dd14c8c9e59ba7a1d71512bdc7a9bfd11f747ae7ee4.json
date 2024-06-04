@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE flight\n            SET\n                ticket_price = $1,\n                source_airport_id = $2,\n                destination_airport_id = $3,\n                date_time = $4,\n                duration = $5\n            WHERE id = $6\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Money",
+        "Bpchar",
+        "Bpchar",
+        "Timestamp",
+        "Interval",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "de7dec9038f3eff4f0ff0dd14c8c9e59ba7a1d71512bdc7a9bfd11f747ae7ee4"
+}

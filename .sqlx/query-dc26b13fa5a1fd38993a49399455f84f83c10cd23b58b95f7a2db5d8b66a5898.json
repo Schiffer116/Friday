@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE ticket_class\n            SET class = $1, multiplier = $2, status = $3\n            WHERE class = $1\n         ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int2",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dc26b13fa5a1fd38993a49399455f84f83c10cd23b58b95f7a2db5d8b66a5898"
+}

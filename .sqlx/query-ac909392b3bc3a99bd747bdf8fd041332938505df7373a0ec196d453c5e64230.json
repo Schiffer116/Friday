@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE user_data\n            SET password_hash = $1\n            WHERE email = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Bpchar",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ac909392b3bc3a99bd747bdf8fd041332938505df7373a0ec196d453c5e64230"
+}

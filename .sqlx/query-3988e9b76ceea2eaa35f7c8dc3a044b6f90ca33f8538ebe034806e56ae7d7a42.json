@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n           SELECT\n                id,\n                flight_id,\n                passenger_name,\n                passenger_id,\n                phone_number,\n                class,\n                passenger_type,\n                book_time,\n                status::VARCHAR(10) as \"status!\",\n                note\n           FROM ticket\n           WHERE book_email = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "flight_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "passenger_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "passenger_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "phone_number",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "class",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "passenger_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "book_time",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 8,
+        "name": "status!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "note",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      true
+    ]
+  },
+  "hash": "3988e9b76ceea2eaa35f7c8dc3a044b6f90ca33f8538ebe034806e56ae7d7a42"
+}

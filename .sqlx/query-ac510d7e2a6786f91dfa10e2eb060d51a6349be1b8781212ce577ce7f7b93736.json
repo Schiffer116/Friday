@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n           UPDATE ticket\n           SET status = 'confirmed'\n           WHERE id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ac510d7e2a6786f91dfa10e2eb060d51a6349be1b8781212ce577ce7f7b93736"
+}

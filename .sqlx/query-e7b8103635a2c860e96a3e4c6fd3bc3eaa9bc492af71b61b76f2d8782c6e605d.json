@@ -1,0 +1,56 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT *\n            FROM policy\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "lock",
+        "type_info": "Bpchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "min_flight_duration",
+        "type_info": "Interval"
+      },
+      {
+        "ordinal": 2,
+        "name": "min_layover_duration",
+        "type_info": "Interval"
+      },
+      {
+        "ordinal": 3,
+        "name": "max_layover_duration",
+        "type_info": "Interval"
+      },
+      {
+        "ordinal": 4,
+        "name": "max_layover_count",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "advance_book_deadline",
+        "type_info": "Interval"
+      },
+      {
+        "ordinal": 6,
+        "name": "cancellation_deadline",
+        "type_info": "Interval"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e7b8103635a2c860e96a3e4c6fd3bc3eaa9bc492af71b61b76f2d8782c6e605d"
+}

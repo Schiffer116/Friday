@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO ticket_class\n                (class, multiplier)\n            VALUES ($1, $2)\n         ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7636e1ce36f02ef988df04f4cdad9426e3632e0f4f81115582847736c5eeb131"
+}

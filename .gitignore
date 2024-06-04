@@ -1,5 +1,4 @@
 /target
-/client
 /scripts
 .envrc
-.env
+
